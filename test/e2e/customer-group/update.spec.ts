@@ -89,7 +89,11 @@ describe("update customer group", () => {
       .set("Authorization", `Bearer ${accessToken}`);
 
     expect(response.statusCode).toEqual(422);
-    expect(response.body.message).toBe("Unprocessable Entity");
+    expect(response.body.code).toBe(422);
+    expect(response.body.status).toBe("Unprocessable Entity");
+    expect(response.body.message).toBe(
+      "The request was well-formed but was unable to be followed due to semantic errors."
+    );
     expect(response.body.errors.name).toBe(["name is exists"]);
   });
   it("should save to database", async () => {
