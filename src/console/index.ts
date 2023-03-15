@@ -1,6 +1,6 @@
 import { URL } from "url";
 import { ExpressCli } from "@point-hub/express-cli";
-import { fileSearch } from "@point-hub/express-utils";
+import DbInit from "./commands/db-init/index.command.js";
 
 export class ConsoleKernel {
   public path = new URL(".", import.meta.url).pathname;
@@ -17,10 +17,6 @@ export class ConsoleKernel {
    * command.register(new ExampleCommand());
    */
   async register() {
-    const result = await fileSearch("/*.command.(js|ts)", this.path, { maxDeep: 2, regExp: true });
-    for (let i = 0; i < result.length; i++) {
-      const { default: Command } = await import(`./${result[i].path}`);
-      this.command.register(new Command());
-    }
+    this.command.register(new DbInit());
   }
 }
