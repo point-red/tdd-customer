@@ -1,13 +1,13 @@
-import request from "supertest";
 import { createApp } from "@src/app.js";
 import { db } from "@src/database/database.js";
+import request from "supertest";
 
 describe("update customer", () => {
   let _id = "";
   beforeEach(async () => {
     const app = await createApp();
     // get access token for authorization request
-    const authResponse = await request(app).patch("/v1/auth/signin").send({
+    const authResponse = await request(app).post("/v1/auth/signin").send({
       username: "admin",
       password: "admin2024",
     });
@@ -20,7 +20,7 @@ describe("update customer", () => {
       address: "21 Street",
       phone: "08123456789",
     };
-    const response = await request(app).post("/v1/customers").send(data).set("Authorization", `Bearer ${accessToken}`);
+    const response = await request(app).post("/v1/customers").set("Authorization", `Bearer ${accessToken}`).send(data);
     _id = response.body._id;
   });
   it("should check user is authorized", async () => {
@@ -66,11 +66,12 @@ describe("update customer", () => {
     // do not send all required fields
     const response = await request(app)
       .patch("/v1/customers/" + _id)
-      .send({})
-      .set("Authorization", `Bearer ${accessToken}`);
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send({});
+
     expect(response.statusCode).toEqual(422);
     expect(response.body.message).toBe("Unprocessable Entity");
-    expect(response.body.errors.name).toBe(["name is required"]);
+    expect(response.body.errors.name).toStrictEqual(["name is required"]);
   });
   it("should check unique fields", async () => {
     const app = await createApp();
@@ -91,24 +92,25 @@ describe("update customer", () => {
 
     const response = await request(app)
       .patch("/v1/customers/" + _id)
-      .send(data)
-      .set("Authorization", `Bearer ${accessToken}`);
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send(data);
 
     expect(response.statusCode).toEqual(422);
     expect(response.body.code).toBe(422);
     expect(response.body.status).toBe("Unprocessable Entity");
-    expect(response.body.message).toBe(
-      "The request was well-formed but was unable to be followed due to semantic errors."
-    );
-    expect(response.body.errors.code).toBe(["code is exists"]);
-    expect(response.body.errors.name).toBe(["name is exists"]);
+
+    expect(response.body.message).toBe("The request was well-formed but was unable to be followed due to semantic errors.");
+
+    expect(response.body.errors.code).toStrictEqual(["code is exists"]);
+    expect(response.body.errors.name).toStrictEqual(["name is exists"]);
+
   });
   it("should save to database", async () => {
     const app = await createApp();
     // get access token for authorization request
-    const authResponse = await request(app).patch("/v1/auth/signin").send({
+    const authResponse = await request(app).post("/v1/auth/signin").send({
       username: "admin",
-      password: "admin2024",
+      password: "admin123",
     });
     const accessToken = authResponse.body.accessToken;
     // send request to create customer
@@ -117,8 +119,10 @@ describe("update customer", () => {
     };
     const response = await request(app)
       .patch("/v1/customers/" + _id)
-      .send(data)
-      .set("Authorization", `Bearer ${accessToken}`);
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send(data);
+
+
     // expected response status
     expect(response.statusCode).toEqual(204);
     // expected database data by user input
