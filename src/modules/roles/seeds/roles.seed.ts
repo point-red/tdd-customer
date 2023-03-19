@@ -12,6 +12,10 @@ export const rolesSeed = [
       "read-role",
       "update-role",
       "delete-role",
+      "create-customer",
+      "read-customer",
+      "update-customer",
+      "delete-customer",
     ],
   },
 ];
